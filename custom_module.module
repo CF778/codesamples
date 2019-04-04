@@ -1,0 +1,20 @@
+<?php
+
+use Drupal\node\Entity\Node;
+use Drupal\entity_print\Controller\EntityPrintController;
+use Drupal\entity_print\PrintBuilderInterface;
+use Drupal\entity_print\Plugin\EntityPrintPluginManagerInterface;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+function custom_module_cron() {
+  //set_time_limit(600);
+  $entity = \Drupal::entityManager()->getStorage('node')->load(111111);
+  $directory = 'test/';
+  //Utilizes Entity Print module services to build PDF and save to directory
+  $print_builder = \Drupal::service('entity_print.print_builder');
+  $print_engine = \Drupal::service('plugin.manager.entity_print.print_engine')->createSelectedInstance('pdf');
+  return (new StreamedResponse(function () use ($print_builder, $entity, $print_engine, $directory) {
+    //Save PDF to the test file directory.
+    $print_builder->savePrintable([$entity], $print_engine, 'public', False, True, $directory);
+  }))->send();
+}
